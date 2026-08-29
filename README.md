@@ -266,8 +266,6 @@ The project combines static analysis, repository scanning, AI-powered explanatio
 
 **Mansi**
 
-Master's Student | Computer Science & Engineering
-
 ---
 
 ## ⭐ Why CodeGuardian AI?
