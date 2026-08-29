@@ -1,0 +1,3027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>CodeGuardian AI | Secure Your Python Code</title>
+
+    <style>
+
+        /* ============================================
+           GLOBAL
+        ============================================ */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+
+            --text: #1e293b;
+            --muted: #64748b;
+
+            --background: #f8fafc;
+            --white: #ffffff;
+
+            --border: #e2e8f0;
+        }
+
+
+        body {
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                var(--background);
+
+            color:
+                var(--text);
+
+            line-height:
+                1.6;
+        }
+
+
+        /* ============================================
+           NAVBAR
+        ============================================ */
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 16px 7%;
+
+            background:
+                rgba(15, 23, 42, 0.97);
+
+            backdrop-filter:
+                blur(10px);
+
+            color: white;
+
+            box-shadow:
+                0 2px 15px rgba(0,0,0,0.15);
+        }
+
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+
+        .nav-button {
+            padding: 9px 18px;
+
+            border-radius: 7px;
+
+            background:
+                var(--primary);
+
+            color: white !important;
+        }
+
+
+        /* ============================================
+           HERO
+        ============================================ */
+
+        .hero {
+            min-height: 520px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            padding: 90px 20px;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0f172a,
+                    #1e1b4b,
+                    #312e81
+                );
+        }
+
+
+        .hero-content {
+            max-width: 850px;
+        }
+
+
+        .badge {
+            display: inline-block;
+
+            padding: 8px 15px;
+
+            margin-bottom: 25px;
+
+            border-radius: 30px;
+
+            background:
+                rgba(99, 102, 241, 0.2);
+
+            border:
+                1px solid rgba(129, 140, 248, 0.4);
+
+            color:
+                #c7d2fe;
+
+            font-size: 14px;
+        }
+
+
+        .hero h1 {
+            font-size: 58px;
+
+            line-height: 1.15;
+
+            margin-bottom: 22px;
+        }
+
+
+        .gradient-text {
+            background:
+                linear-gradient(
+                    90deg,
+                    #818cf8,
+                    #c084fc,
+                    #60a5fa
+                );
+
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+
+        .hero p {
+            max-width: 700px;
+
+            margin: auto;
+
+            color: #cbd5e1;
+
+            font-size: 18px;
+        }
+
+
+        .hero-buttons {
+            margin-top: 35px;
+
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+
+        .hero-btn {
+            padding: 14px 25px;
+
+            border-radius: 8px;
+
+            text-decoration: none;
+
+            font-weight: 600;
+
+            transition: 0.2s;
+        }
+
+
+        .hero-btn-primary {
+            background:
+                var(--primary);
+
+            color: white;
+        }
+
+
+        .hero-btn-primary:hover {
+            background:
+                var(--primary-dark);
+
+            transform:
+                translateY(-2px);
+        }
+
+
+        .hero-btn-secondary {
+            border:
+                1px solid #475569;
+
+            color: white;
+        }
+
+
+        .hero-btn-secondary:hover {
+            background:
+                rgba(255,255,255,0.08);
+        }
+
+
+        /* ============================================
+           FEATURES
+        ============================================ */
+
+        .features {
+            padding: 80px 7%;
+        }
+
+
+        .section-heading {
+            text-align: center;
+
+            max-width: 700px;
+
+            margin: auto auto 50px;
+        }
+
+
+        .section-heading h2 {
+            font-size: 36px;
+
+            margin-bottom: 12px;
+        }
+
+
+        .section-heading p {
+            color:
+                var(--muted);
+        }
+
+
+        .feature-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 22px;
+
+            max-width: 1250px;
+
+            margin: auto;
+        }
+
+
+        .feature-card {
+            padding: 28px;
+
+            background:
+                white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 14px;
+
+            transition: 0.25s;
+
+            box-shadow:
+                0 5px 20px rgba(15,23,42,0.04);
+        }
+
+
+        .feature-card:hover {
+            transform:
+                translateY(-5px);
+
+            box-shadow:
+                0 15px 35px rgba(15,23,42,0.1);
+        }
+
+
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 12px;
+
+            font-size: 25px;
+
+            background:
+                #eef2ff;
+
+            margin-bottom: 18px;
+        }
+
+
+        .feature-card h3 {
+            margin-bottom: 10px;
+        }
+
+
+        .feature-card p {
+            font-size: 14px;
+
+            color:
+                var(--muted);
+        }
+
+
+        /* ============================================
+           APP CONTAINER
+        ============================================ */
+
+        .app-section {
+            padding: 80px 7%;
+
+            background:
+                #f1f5f9;
+        }
+
+
+        .container {
+            width: 100%;
+
+            max-width: 1200px;
+
+            margin: auto;
+        }
+
+
+        .panel {
+            background:
+                white;
+
+            border-radius: 16px;
+
+            padding: 30px;
+
+            margin-bottom: 25px;
+
+            border:
+                1px solid var(--border);
+
+            box-shadow:
+                0 8px 25px rgba(0,0,0,0.05);
+        }
+
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .panel-icon {
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background:
+                #eef2ff;
+        }
+
+
+        h2 {
+            font-size: 24px;
+        }
+
+
+        h3 {
+            margin-top: 28px;
+            margin-bottom: 12px;
+        }
+
+
+        .description {
+            color:
+                var(--muted);
+
+            margin-bottom: 18px;
+        }
+
+
+        /* ============================================
+           INPUTS
+        ============================================ */
+
+        textarea {
+            width: 100%;
+
+            min-height: 280px;
+
+            padding: 18px;
+
+            border-radius: 10px;
+
+            border:
+                1px solid var(--border);
+
+            font-family:
+                Consolas,
+                monospace;
+
+            font-size: 14px;
+
+            resize: vertical;
+
+            background:
+                #f8fafc;
+        }
+
+
+        textarea:focus,
+        input:focus {
+            outline: none;
+
+            border-color:
+                var(--primary);
+
+            box-shadow:
+                0 0 0 3px rgba(99,102,241,0.1);
+        }
+
+
+        input[type="file"] {
+            width: 100%;
+
+            padding: 15px;
+
+            border:
+                2px dashed #cbd5e1;
+
+            border-radius: 10px;
+
+            background:
+                #f8fafc;
+
+            cursor: pointer;
+        }
+
+
+        /* ============================================
+           BUTTONS
+        ============================================ */
+
+        button {
+            border: none;
+
+            cursor: pointer;
+
+            padding: 12px 20px;
+
+            border-radius: 8px;
+
+            background:
+                var(--primary);
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            transition: 0.2s;
+
+            margin-top: 15px;
+        }
+
+
+        button:hover {
+            background:
+                var(--primary-dark);
+
+            transform:
+                translateY(-1px);
+        }
+
+
+        button:disabled {
+            opacity: 0.6;
+
+            cursor:
+                not-allowed;
+
+            transform: none;
+        }
+
+
+        .fix-button {
+            background:
+                #16a34a;
+        }
+
+
+        .fix-button:hover {
+            background:
+                #15803d;
+        }
+
+
+        .download-button {
+            background:
+                #7c3aed;
+        }
+
+
+        .download-button:hover {
+            background:
+                #6d28d9;
+        }
+
+
+        /* ============================================
+           LOADING
+        ============================================ */
+
+        .loading {
+            display: none;
+
+            margin-top: 18px;
+
+            padding: 14px;
+
+            border-radius: 8px;
+
+            background:
+                #eef2ff;
+
+            color:
+                #4338ca;
+
+            font-weight: 600;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+
+
+        /* ============================================
+           RESULTS
+        ============================================ */
+
+        .result-box {
+            margin-top: 25px;
+
+            padding: 25px;
+
+            background:
+                #f8fafc;
+
+            border-radius: 12px;
+
+            border:
+                1px solid var(--border);
+        }
+
+
+        .success {
+            color:
+                #15803d;
+
+            font-weight: 600;
+        }
+
+
+        .error {
+            color:
+                #dc2626;
+
+            font-weight: 600;
+        }
+
+
+        /* ============================================
+           STATS
+        ============================================ */
+
+        .stats {
+            display: grid;
+
+            grid-template-columns:
+                repeat(5, 1fr);
+
+            gap: 15px;
+
+            margin: 25px 0;
+        }
+
+
+        .stat-card {
+            padding: 20px 12px;
+
+            text-align: center;
+
+            background:
+                #f8fafc;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+        }
+
+
+        .stat-number {
+            display: block;
+
+            font-size: 28px;
+
+            font-weight: 700;
+
+            color:
+                var(--primary);
+
+            margin-bottom: 5px;
+        }
+
+
+        .stat-label {
+            font-size: 12px;
+
+            color:
+                var(--muted);
+        }
+
+
+        /* ============================================
+           RISK
+        ============================================ */
+
+        .risk-card {
+            padding: 22px;
+
+            background:
+                #f8fafc;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .risk-title {
+            font-weight: 700;
+
+            margin-bottom: 12px;
+        }
+
+
+        .risk-bar {
+            height: 14px;
+
+            background:
+                #e2e8f0;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+        }
+
+
+        .risk-fill {
+            height: 100%;
+
+            width: 0%;
+
+            transition:
+                width 0.5s ease;
+
+            border-radius: 20px;
+        }
+
+
+        .risk-low {
+            background:
+                #22c55e;
+        }
+
+
+        .risk-medium {
+            background:
+                #f59e0b;
+        }
+
+
+        .risk-high {
+            background:
+                #f97316;
+        }
+
+
+        .risk-critical {
+            background:
+                #ef4444;
+        }
+
+
+        .risk-score {
+            margin-top: 10px;
+
+            font-weight: 600;
+        }
+
+
+        /* ============================================
+           FINDINGS
+        ============================================ */
+
+        .finding {
+            padding: 17px;
+
+            margin: 12px 0;
+
+            border-radius: 9px;
+
+            border-left:
+                5px solid #f97316;
+
+            background:
+                #fff7ed;
+        }
+
+
+        .finding.critical {
+            background:
+                #fef2f2;
+
+            border-left-color:
+                #dc2626;
+        }
+
+
+        .finding.high {
+            background:
+                #fff7ed;
+
+            border-left-color:
+                #f97316;
+        }
+
+
+        .finding.medium {
+            background:
+                #fffbeb;
+
+            border-left-color:
+                #f59e0b;
+        }
+
+
+        .finding.low {
+            background:
+                #f0fdf4;
+
+            border-left-color:
+                #16a34a;
+        }
+
+
+        /* ============================================
+           AI BOX
+        ============================================ */
+
+        .ai-box {
+            line-height: 1.7;
+
+            font-size: 15px;
+        }
+
+
+        .ai-box pre,
+        .fixed-code-box pre {
+            background:
+                #0f172a;
+
+            color:
+                #e2e8f0;
+
+            padding: 20px;
+
+            border-radius: 10px;
+
+            overflow-x: auto;
+
+            font-family:
+                Consolas,
+                monospace;
+
+            margin-top: 15px;
+
+            white-space:
+                pre-wrap;
+        }
+
+
+        /* ============================================
+           BUTTON ROW
+        ============================================ */
+
+        .button-row,
+        .question-buttons {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .question-buttons button {
+            margin-top: 0;
+
+            background:
+                #eef2ff;
+
+            color:
+                #4338ca;
+
+            border:
+                1px solid #c7d2fe;
+        }
+
+
+        .question-buttons button:hover {
+            background:
+                #e0e7ff;
+        }
+
+
+        /* ============================================
+           ANSWERS
+        ============================================ */
+
+        .answer-box {
+            margin-top: 20px;
+
+            padding: 22px;
+
+            background:
+                #f8fafc;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            line-height: 1.7;
+        }
+
+
+        .source-box {
+            margin-top: 15px;
+
+            padding: 15px;
+
+            background:
+                white;
+
+            border-left:
+                4px solid var(--primary);
+
+            border-radius: 6px;
+
+            font-family:
+                Consolas,
+                monospace;
+
+            font-size: 13px;
+
+            white-space:
+                pre-wrap;
+
+            overflow-x: auto;
+        }
+
+
+        .message {
+            margin-top: 15px;
+
+            padding: 13px;
+
+            border-radius: 8px;
+
+            display: none;
+        }
+
+
+        .success-message {
+            display: block;
+
+            background:
+                #f0fdf4;
+
+            color:
+                #166534;
+        }
+
+
+        .error-message {
+            display: block;
+
+            background:
+                #fef2f2;
+
+            color:
+                #b91c1c;
+        }
+
+
+        /* ============================================
+           FOOTER
+        ============================================ */
+
+        footer {
+            text-align: center;
+
+            padding: 30px;
+
+            background:
+                #0f172a;
+
+            color:
+                #94a3b8;
+        }
+
+
+        /* ============================================
+           RESPONSIVE
+        ============================================ */
+
+        @media (max-width: 1000px) {
+
+            .feature-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+
+            .stats {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+
+
+            .hero h1 {
+                font-size: 45px;
+            }
+        }
+
+
+        @media (max-width: 650px) {
+
+            nav {
+                padding: 15px 5%;
+            }
+
+
+            .nav-links {
+                display: none;
+            }
+
+
+            .hero {
+                min-height: 450px;
+
+                padding: 70px 20px;
+            }
+
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+
+            .hero p {
+                font-size: 16px;
+            }
+
+
+            .feature-grid {
+                grid-template-columns:
+                    1fr;
+            }
+
+
+            .stats {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+
+            .panel {
+                padding: 20px;
+            }
+
+
+            .app-section {
+                padding: 50px 5%;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- ============================================
+     NAVBAR
+============================================ -->
+
+<nav>
+
+    <div class="logo">
+        🛡️ CodeGuardian AI
+    </div>
+
+
+    <div class="nav-links">
+
+        <a href="#features">
+            Features
+        </a>
+
+        <a href="#scanner">
+            Scanner
+        </a>
+
+        <a href="#scanner"
+           class="nav-button">
+            Start Scanning
+        </a>
+
+    </div>
+
+</nav>
+
+
+<!-- ============================================
+     HERO
+============================================ -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="badge">
+            🚀 AI-Powered Security Analysis
+        </div>
+
+
+        <h1>
+
+            Secure Your Python Code
+
+            <span class="gradient-text">
+                With AI
+            </span>
+
+        </h1>
+
+
+        <p>
+
+            Detect vulnerabilities, analyze repositories,
+            generate security reviews and automatically
+            create safer versions of your Python code.
+
+        </p>
+
+
+        <div class="hero-buttons">
+
+            <a
+                href="#scanner"
+                class="hero-btn hero-btn-primary"
+            >
+                🛡️ Scan Your Code
+            </a>
+
+
+            <a
+                href="#features"
+                class="hero-btn hero-btn-secondary"
+            >
+                Explore Features
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ============================================
+     FEATURES
+============================================ -->
+
+<section
+    class="features"
+    id="features"
+>
+
+    <div class="section-heading">
+
+        <h2>
+            Everything You Need To Secure Your Code
+        </h2>
+
+        <p>
+            CodeGuardian AI helps developers identify,
+            understand and fix security vulnerabilities.
+        </p>
+
+    </div>
+
+
+    <div class="feature-grid">
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🔍
+            </div>
+
+            <h3>
+                Code Analysis
+            </h3>
+
+            <p>
+                Analyze Python code and detect
+                syntax, security and quality issues.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                📦
+            </div>
+
+            <h3>
+                Repository Scanner
+            </h3>
+
+            <p>
+                Upload your Python repository and
+                automatically scan every Python file.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🤖
+            </div>
+
+            <h3>
+                AI Security Review
+            </h3>
+
+            <p>
+                Generate intelligent explanations
+                and recommendations for your code.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🔧
+            </div>
+
+            <h3>
+                Auto Fix
+            </h3>
+
+            <p>
+                Generate a safer version of vulnerable
+                Python files automatically.
+            </p>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- ============================================
+     APPLICATION
+============================================ -->
+
+<section
+    class="app-section"
+    id="scanner"
+>
+
+<div class="container">
+
+
+<!-- ============================================
+     CODE ANALYZER
+============================================ -->
+
+<div class="panel">
+
+    <div class="panel-header">
+
+        <div class="panel-icon">
+            💻
+        </div>
+
+        <div>
+
+            <h2>
+                Analyze Python Code
+            </h2>
+
+            <p class="description">
+                Paste your Python code and get an
+                instant security analysis.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <textarea
+        id="code"
+        placeholder="Paste your Python code here..."
+    ></textarea>
+
+
+    <button onclick="analyzeCode()">
+
+        🔍 Analyze Code
+
+    </button>
+
+
+    <div
+        id="codeLoading"
+        class="loading"
+    >
+        🤖 Analyzing your Python code...
+    </div>
+
+
+    <div
+        id="codeResults"
+        class="result-box hidden"
+    >
+
+        <h2>
+            📊 Analysis Results
+        </h2>
+
+
+        <p id="codeStatus"></p>
+
+
+        <h3>
+            ⚠️ Issues Found
+        </h3>
+
+
+        <div id="codeIssues"></div>
+
+
+        <h3>
+            🤖 AI Code Review
+        </h3>
+
+
+        <div
+            id="codeAIAnalysis"
+            class="ai-box"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================
+     REPOSITORY UPLOAD
+============================================ -->
+
+<div class="panel">
+
+    <div class="panel-header">
+
+        <div class="panel-icon">
+            📦
+        </div>
+
+        <div>
+
+            <h2>
+                Scan Repository
+            </h2>
+
+            <p class="description">
+                Upload a ZIP file containing
+                your Python repository.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <input
+        type="file"
+        id="repositoryFile"
+        accept=".zip"
+    >
+
+
+    <button onclick="scanRepository()">
+
+        🛡️ Scan Repository
+
+    </button>
+
+
+    <div
+        id="repositoryLoading"
+        class="loading"
+    >
+        🔍 Scanning your repository...
+    </div>
+
+
+</div>
+
+
+<!-- ============================================
+     REPOSITORY RESULTS
+============================================ -->
+
+<div
+    id="repositoryResults"
+    class="panel hidden"
+>
+
+
+    <h2>
+        📊 Repository Results
+    </h2>
+
+
+    <p
+        id="repositoryStatus"
+        class="success"
+    >
+        ✅ Repository scanned successfully!
+    </p>
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+
+        <div class="stat-card">
+
+            <span
+                id="pythonFiles"
+                class="stat-number"
+            >
+                0
+            </span>
+
+            <span class="stat-label">
+                🐍 Python Files
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span
+                id="totalLines"
+                class="stat-number"
+            >
+                0
+            </span>
+
+            <span class="stat-label">
+                📝 Total Lines
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span
+                id="totalFunctions"
+                class="stat-number"
+            >
+                0
+            </span>
+
+            <span class="stat-label">
+                🔧 Functions
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span
+                id="totalClasses"
+                class="stat-number"
+            >
+                0
+            </span>
+
+            <span class="stat-label">
+                🏛️ Classes
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span
+                id="riskScore"
+                class="stat-number"
+            >
+                0/100
+            </span>
+
+            <span class="stat-label">
+                🔐 Security Risk
+            </span>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- RISK -->
+
+    <div class="risk-card">
+
+        <div class="risk-title">
+
+            🔐 Security Risk Level
+
+        </div>
+
+
+        <div class="risk-bar">
+
+            <div
+                id="riskFill"
+                class="risk-fill"
+            ></div>
+
+        </div>
+
+
+        <div
+            id="riskText"
+            class="risk-score"
+        >
+
+            Risk Score: 0/100
+
+        </div>
+
+    </div>
+
+
+    <!-- FINDINGS -->
+
+    <h3>
+        🔐 Security Findings
+    </h3>
+
+
+    <div id="securityFindings">
+
+        <p class="success">
+            ✅ No security findings.
+        </p>
+
+    </div>
+
+
+    <!-- AI REVIEW -->
+
+    <h3>
+        🤖 AI Repository Review
+    </h3>
+
+
+    <button
+        id="generateReviewButton"
+        onclick="generateRepositoryReview()"
+    >
+
+        🤖 Generate AI Repository Review
+
+    </button>
+
+
+    <div
+        id="reviewLoading"
+        class="loading"
+    >
+
+        🤖 Generating AI repository review...
+
+    </div>
+
+
+    <div
+        id="aiRepositoryReview"
+        class="ai-box"
+        style="margin-top:20px;"
+    ></div>
+
+
+    <!-- FIX -->
+
+    <h3>
+        🔧 Fix Repository Code
+    </h3>
+
+
+    <p class="description">
+
+        Generate a safer version of
+        vulnerable Python files.
+
+    </p>
+
+
+    <button
+        id="generateFixButton"
+        class="fix-button"
+        onclick="generateRepositoryFix()"
+    >
+
+        🔧 Generate Repository Fix
+
+    </button>
+
+
+    <div
+        id="fixLoading"
+        class="loading"
+    >
+
+        🔧 Generating fixed repository...
+
+    </div>
+
+
+    <div
+        id="fixMessage"
+        class="message"
+    ></div>
+
+
+    <div
+        id="fixedCodeSection"
+        class="hidden"
+    >
+
+        <h3>
+            ✅ Fixed Repository
+        </h3>
+
+
+        <div class="fixed-code-box">
+
+            <pre id="fixedCode"></pre>
+
+        </div>
+
+
+        <button
+            class="download-button"
+            onclick="downloadFixedCode()"
+        >
+
+            ⬇️ Download Fixed Repository
+
+        </button>
+
+    </div>
+
+
+    <!-- ASK REPOSITORY -->
+
+    <h3>
+        💬 Ask Your Repository
+    </h3>
+
+
+    <p class="description">
+
+        Ask AI questions about the
+        repository you scanned.
+
+    </p>
+
+
+    <div class="question-buttons">
+
+        <button onclick="askRepository('security')">
+            🔐 Security
+        </button>
+
+
+        <button onclick="askRepository('functions')">
+            🔧 Functions
+        </button>
+
+
+        <button onclick="askRepository('architecture')">
+            🏗️ Architecture
+        </button>
+
+
+        <button onclick="askRepository('explain')">
+            💡 Explain Code
+        </button>
+
+    </div>
+
+
+    <!-- CUSTOM QUESTION -->
+
+    <h3>
+        ✍️ Ask Your Own Question
+    </h3>
+
+
+    <textarea
+        id="repositoryQuestion"
+        style="min-height:120px;"
+        placeholder="Example: What security vulnerabilities exist in this repository?"
+    ></textarea>
+
+
+    <button onclick="askCustomQuestion()">
+
+        🤖 Ask AI
+
+    </button>
+
+
+    <div
+        id="askLoading"
+        class="loading"
+    >
+
+        🤖 Processing your question...
+
+    </div>
+
+
+    <div
+        id="aiAnswer"
+        class="answer-box hidden"
+    ></div>
+
+
+</div>
+
+
+</div>
+
+</section>
+
+
+<!-- ============================================
+     FOOTER
+============================================ -->
+
+<footer>
+
+    <p>
+        🛡️ CodeGuardian AI
+        • AI-Powered Python Security Analysis
+    </p>
+
+    <p style="margin-top:8px;font-size:13px;">
+        Secure Code. Build With Confidence.
+    </p>
+
+</footer>
+
+
+<script>
+
+
+// ================================================
+// API CONFIGURATION
+// ================================================
+
+const API_BASE =
+    "http://127.0.0.1:8000";
+
+
+let scannedRepositoryFile = null;
+
+let latestFixedRepositoryBlob = null;
+
+
+// ================================================
+// ESCAPE HTML
+// ================================================
+
+function escapeHtml(text) {
+
+    if (
+        text === null ||
+        text === undefined
+    ) {
+        return "";
+    }
+
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// ================================================
+// FORMAT MARKDOWN
+// ================================================
+
+function formatMarkdown(text) {
+
+    if (!text) {
+        return "";
+    }
+
+    let html =
+        escapeHtml(text);
+
+    html =
+        html.replace(
+            /```(?:python|py)?\s*([\s\S]*?)```/gi,
+            function(match, code) {
+                return "<pre><code>" +
+                    code.trim() +
+                    "</code></pre>";
+            }
+        );
+
+    html =
+        html.replace(
+            /^### (.*)$/gm,
+            "<h3>$1</h3>"
+        );
+
+    html =
+        html.replace(
+            /^## (.*)$/gm,
+            "<h2>$1</h2>"
+        );
+
+    html =
+        html.replace(
+            /^# (.*)$/gm,
+            "<h2>$1</h2>"
+        );
+
+    html =
+        html.replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>"
+        );
+
+    html =
+        html.replace(
+            /^---$/gm,
+            "<hr>"
+        );
+
+    html =
+        html.replace(
+            /^\s*[•*-]\s+(.*)$/gm,
+            "<li>$1</li>"
+        );
+
+    html =
+        html.replace(
+            /^\s*\d+[.)]\s+(.*)$/gm,
+            "<li>$1</li>"
+        );
+
+    html =
+        html.replace(
+            /\n/g,
+            "<br>"
+        );
+
+    return html;
+}
+
+
+// ================================================
+// ERROR MESSAGE
+// ================================================
+
+function getErrorMessage(data, fallback) {
+
+    if (!data) {
+        return fallback;
+    }
+
+    if (
+        typeof data.detail === "string"
+    ) {
+        return data.detail;
+    }
+
+    if (data.message) {
+        return data.message;
+    }
+
+    if (data.error) {
+        return data.error;
+    }
+
+    return fallback;
+}
+
+
+// ================================================
+// ANALYZE CODE
+// ================================================
+
+async function analyzeCode() {
+
+    const code =
+        document.getElementById("code").value;
+
+    if (!code.trim()) {
+
+        alert(
+            "Please enter some Python code first!"
+        );
+
+        return;
+    }
+
+    const loading =
+        document.getElementById(
+            "codeLoading"
+        );
+
+    const results =
+        document.getElementById(
+            "codeResults"
+        );
+
+    loading.style.display =
+        "block";
+
+    results.classList.add(
+        "hidden"
+    );
+
+    try {
+
+        const response =
+            await fetch(
+                API_BASE + "/analyze",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "text/plain"
+                    },
+
+                    body: code
+                }
+            );
+
+        const data =
+            await response.json();
+
+        loading.style.display =
+            "none";
+
+        results.classList.remove(
+            "hidden"
+        );
+
+        const status =
+            document.getElementById(
+                "codeStatus"
+            );
+
+        if (data.status === "success") {
+
+            status.textContent =
+                "✅ " +
+                (
+                    data.message ||
+                    "Analysis completed successfully."
+                );
+
+            status.className =
+                "success";
+
+        } else {
+
+            status.textContent =
+                "❌ Analysis failed";
+
+            status.className =
+                "error";
+        }
+
+        const issues =
+            document.getElementById(
+                "codeIssues"
+            );
+
+        issues.innerHTML = "";
+
+        if (
+            data.issues &&
+            data.issues.length > 0
+        ) {
+
+            data.issues.forEach(
+                issue => {
+
+                    const div =
+                        document.createElement(
+                            "div"
+                        );
+
+                    div.className =
+                        "finding " +
+                        String(
+                            issue.severity ||
+                            "medium"
+                        ).toLowerCase();
+
+                    div.innerHTML = `
+                        <strong>
+                            ${escapeHtml(
+                                issue.type ||
+                                "Issue"
+                            )}
+                        </strong>
+                        <br>
+                        <b>Severity:</b>
+                        ${escapeHtml(
+                            issue.severity ||
+                            "N/A"
+                        )}
+                        <br>
+                        ${escapeHtml(
+                            issue.message ||
+                            ""
+                        )}
+                    `;
+
+                    issues.appendChild(
+                        div
+                    );
+                }
+            );
+
+        } else {
+
+            issues.innerHTML =
+                "<p class='success'>✅ No issues found!</p>";
+        }
+
+        document.getElementById(
+            "codeAIAnalysis"
+        ).innerHTML =
+            formatMarkdown(
+                data.ai_analysis ||
+                "No AI analysis available."
+            );
+
+    }
+
+    catch (error) {
+
+        loading.style.display =
+            "none";
+
+        results.classList.remove(
+            "hidden"
+        );
+
+        document.getElementById(
+            "codeStatus"
+        ).textContent =
+            "❌ Could not connect to backend.";
+
+        document.getElementById(
+            "codeStatus"
+        ).className =
+            "error";
+
+        document.getElementById(
+            "codeIssues"
+        ).innerHTML =
+            escapeHtml(
+                error.message
+            );
+    }
+}
+
+
+// ================================================
+// SCAN REPOSITORY
+// ================================================
+
+async function scanRepository() {
+
+    const fileInput =
+        document.getElementById(
+            "repositoryFile"
+        );
+
+    if (
+        !fileInput.files ||
+        fileInput.files.length === 0
+    ) {
+
+        alert(
+            "Please select a ZIP repository first!"
+        );
+
+        return;
+    }
+
+    const file =
+        fileInput.files[0];
+
+    if (
+        !file.name
+            .toLowerCase()
+            .endsWith(".zip")
+    ) {
+
+        alert(
+            "Please upload a ZIP file."
+        );
+
+        return;
+    }
+
+    scannedRepositoryFile =
+        file;
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "file",
+        file
+    );
+
+    const loading =
+        document.getElementById(
+            "repositoryLoading"
+        );
+
+    const results =
+        document.getElementById(
+            "repositoryResults"
+        );
+
+    loading.style.display =
+        "block";
+
+    results.classList.add(
+        "hidden"
+    );
+
+    try {
+
+        const response =
+            await fetch(
+                API_BASE +
+                "/scan-repository",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+        const data =
+            await response.json();
+
+        loading.style.display =
+            "none";
+
+        results.classList.remove(
+            "hidden"
+        );
+
+        if (
+            !response.ok ||
+            data.status === "error"
+        ) {
+
+            throw new Error(
+                getErrorMessage(
+                    data,
+                    "Repository scan failed."
+                )
+            );
+        }
+
+        const repository =
+            data.repository || {};
+
+        const securityReport =
+            data.security_report || {};
+
+        const findings =
+            securityReport.findings ||
+            data.security_findings ||
+            data.findings ||
+            [];
+
+        document.getElementById(
+            "pythonFiles"
+        ).textContent =
+            repository.python_files ??
+            repository.total_files ??
+            repository.files?.length ??
+            data.python_files ??
+            0;
+
+        document.getElementById(
+            "totalLines"
+        ).textContent =
+            repository.total_lines ??
+            data.total_lines ??
+            0;
+
+        document.getElementById(
+            "totalFunctions"
+        ).textContent =
+            repository.functions ??
+            repository.total_functions ??
+            data.total_functions ??
+            0;
+
+        document.getElementById(
+            "totalClasses"
+        ).textContent =
+            repository.classes ??
+            repository.total_classes ??
+            data.total_classes ??
+            0;
+
+        const score =
+            Number(
+                data.security_risk_score ??
+                data.risk_score ??
+                0
+            );
+
+        document.getElementById(
+            "riskScore"
+        ).textContent =
+            score + "/100";
+
+        updateRisk(score);
+
+        displaySecurityFindings(
+            findings
+        );
+
+        document.getElementById(
+            "aiRepositoryReview"
+        ).innerHTML = "";
+
+        document.getElementById(
+            "fixedCodeSection"
+        ).classList.add(
+            "hidden"
+        );
+
+        document.getElementById(
+            "fixMessage"
+        ).style.display =
+            "none";
+
+        latestFixedRepositoryBlob =
+            null;
+
+        document.getElementById(
+            "aiAnswer"
+        ).classList.add(
+            "hidden"
+        );
+
+        document.getElementById(
+            "repositoryStatus"
+        ).textContent =
+            "✅ Repository scanned and indexed successfully!";
+
+        document.getElementById(
+            "repositoryStatus"
+        ).className =
+            "success";
+
+    }
+
+    catch (error) {
+
+        loading.style.display =
+            "none";
+
+        results.classList.remove(
+            "hidden"
+        );
+
+        document.getElementById(
+            "repositoryStatus"
+        ).textContent =
+            "❌ Repository scan failed: " +
+            error.message;
+
+        document.getElementById(
+            "repositoryStatus"
+        ).className =
+            "error";
+
+        console.error(error);
+    }
+}
+
+
+// ================================================
+// UPDATE RISK
+// ================================================
+
+function updateRisk(score) {
+
+    const fill =
+        document.getElementById(
+            "riskFill"
+        );
+
+    const text =
+        document.getElementById(
+            "riskText"
+        );
+
+    fill.className =
+        "risk-fill";
+
+    if (score < 30) {
+
+        fill.classList.add(
+            "risk-low"
+        );
+
+        text.textContent =
+            "🟢 Low Risk — " +
+            score + "/100";
+
+    }
+
+    else if (score < 60) {
+
+        fill.classList.add(
+            "risk-medium"
+        );
+
+        text.textContent =
+            "🟡 Medium Risk — " +
+            score + "/100";
+
+    }
+
+    else if (score < 80) {
+
+        fill.classList.add(
+            "risk-high"
+        );
+
+        text.textContent =
+            "🟠 High Risk — " +
+            score + "/100";
+
+    }
+
+    else {
+
+        fill.classList.add(
+            "risk-critical"
+        );
+
+        text.textContent =
+            "🔴 Critical Risk — " +
+            score + "/100";
+    }
+
+    fill.style.width =
+        Math.min(
+            Math.max(score, 0),
+            100
+        ) + "%";
+}
+
+
+// ================================================
+// DISPLAY FINDINGS
+// ================================================
+
+function displaySecurityFindings(findings) {
+
+    const container =
+        document.getElementById(
+            "securityFindings"
+        );
+
+    container.innerHTML = "";
+
+    if (
+        !findings ||
+        findings.length === 0
+    ) {
+
+        container.innerHTML =
+            "<p class='success'>✅ No security findings.</p>";
+
+        return;
+    }
+
+    findings.forEach(
+        finding => {
+
+            const severity =
+                String(
+                    finding.severity ||
+                    "medium"
+                ).toLowerCase();
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className =
+                "finding " + severity;
+
+            div.innerHTML = `
+                <strong>
+                    🔐 ${escapeHtml(
+                        finding.type ||
+                        "Security Finding"
+                    )}
+                </strong>
+
+                <br>
+
+                <b>Severity:</b>
+                ${escapeHtml(
+                    finding.severity ||
+                    "Unknown"
+                )}
+
+                <br>
+
+                <b>File:</b>
+                ${escapeHtml(
+                    finding.file ||
+                    "Unknown"
+                )}
+
+                <br>
+
+                ${
+                    finding.line
+                    ?
+                    `<b>Line:</b>
+                    ${escapeHtml(
+                        finding.line
+                    )}
+                    <br>`
+                    :
+                    ""
+                }
+
+                ${escapeHtml(
+                    finding.message ||
+                    ""
+                )}
+            `;
+
+            container.appendChild(div);
+        }
+    );
+}
+
+
+// ================================================
+// GENERATE REPOSITORY REVIEW
+// ================================================
+
+async function generateRepositoryReview() {
+
+    if (!scannedRepositoryFile) {
+
+        alert(
+            "Please scan a repository first."
+        );
+
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            "generateReviewButton"
+        );
+
+    const loading =
+        document.getElementById(
+            "reviewLoading"
+        );
+
+    const reviewBox =
+        document.getElementById(
+            "aiRepositoryReview"
+        );
+
+    button.disabled = true;
+
+    loading.style.display =
+        "block";
+
+    reviewBox.innerHTML = "";
+
+    try {
+
+        const formData =
+            new FormData();
+
+        formData.append(
+            "file",
+            scannedRepositoryFile
+        );
+
+        const response =
+            await fetch(
+                API_BASE +
+                "/review-repository",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                getErrorMessage(
+                    data,
+                    "AI review unavailable."
+                )
+            );
+        }
+
+        reviewBox.innerHTML =
+            formatMarkdown(
+                data.ai_review ||
+                "No review available."
+            );
+
+    }
+
+    catch (error) {
+
+        reviewBox.innerHTML =
+            `<p class="error">
+                ❌ ${escapeHtml(
+                    error.message
+                )}
+            </p>`;
+    }
+
+    finally {
+
+        loading.style.display =
+            "none";
+
+        button.disabled =
+            false;
+    }
+}
+
+
+// ================================================
+// GENERATE REPOSITORY FIX
+// ================================================
+
+async function generateRepositoryFix() {
+
+    if (!scannedRepositoryFile) {
+
+        alert(
+            "Please scan a repository first."
+        );
+
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            "generateFixButton"
+        );
+
+    const loading =
+        document.getElementById(
+            "fixLoading"
+        );
+
+    const message =
+        document.getElementById(
+            "fixMessage"
+        );
+
+    const fixedSection =
+        document.getElementById(
+            "fixedCodeSection"
+        );
+
+    const fixedCodeBox =
+        document.getElementById(
+            "fixedCode"
+        );
+
+    button.disabled = true;
+
+    loading.style.display =
+        "block";
+
+    message.style.display =
+        "none";
+
+    fixedSection.classList.add(
+        "hidden"
+    );
+
+    latestFixedRepositoryBlob =
+        null;
+
+    try {
+
+        const formData =
+            new FormData();
+
+        formData.append(
+            "file",
+            scannedRepositoryFile
+        );
+
+        const response =
+            await fetch(
+                API_BASE +
+                "/fix-repository",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+        if (!response.ok) {
+
+            let errorMessage =
+                "Could not generate repository fix.";
+
+            try {
+
+                const errorData =
+                    await response.json();
+
+                errorMessage =
+                    getErrorMessage(
+                        errorData,
+                        errorMessage
+                    );
+
+            } catch {}
+
+            throw new Error(
+                errorMessage
+            );
+        }
+
+        const blob =
+            await response.blob();
+
+        if (
+            !blob ||
+            blob.size === 0
+        ) {
+
+            throw new Error(
+                "The backend returned an empty file."
+            );
+        }
+
+        latestFixedRepositoryBlob =
+            blob;
+
+        fixedCodeBox.textContent =
+
+            "✅ CodeGuardian successfully generated the fixed repository.\n\n" +
+
+            "📦 File:\n" +
+
+            "CodeGuardian_Fixed_Repository.zip\n\n" +
+
+            "The fixed repository contains safer versions of vulnerable Python files.";
+
+        fixedSection.classList.remove(
+            "hidden"
+        );
+
+        message.textContent =
+            "✅ Fixed repository generated successfully!";
+
+        message.className =
+            "message success-message";
+
+        message.style.display =
+            "block";
+
+    }
+
+    catch (error) {
+
+        message.textContent =
+            "❌ " + error.message;
+
+        message.className =
+            "message error-message";
+
+        message.style.display =
+            "block";
+
+        console.error(error);
+    }
+
+    finally {
+
+        loading.style.display =
+            "none";
+
+        button.disabled =
+            false;
+    }
+}
+
+
+// ================================================
+// DOWNLOAD FIXED REPOSITORY
+// ================================================
+
+function downloadFixedCode() {
+
+    if (!latestFixedRepositoryBlob) {
+
+        alert(
+            "No fixed repository available."
+        );
+
+        return;
+    }
+
+    const url =
+        URL.createObjectURL(
+            latestFixedRepositoryBlob
+        );
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+        "CodeGuardian_Fixed_Repository.zip";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    setTimeout(
+        () => URL.revokeObjectURL(url),
+        1000
+    );
+}
+
+
+// ================================================
+// ASK REPOSITORY
+// ================================================
+
+async function askRepository(type) {
+
+    const questions = {
+
+        security:
+            "What are the main security vulnerabilities in this repository? Explain severity and fixes.",
+
+        functions:
+            "What functions are present in this repository and what does each function do?",
+
+        architecture:
+            "Explain the architecture and structure of this repository.",
+
+        explain:
+            "Explain this repository in simple terms."
+
+    };
+
+    await sendRepositoryQuestion(
+        questions[type]
+    );
+}
+
+
+// ================================================
+// CUSTOM QUESTION
+// ================================================
+
+async function askCustomQuestion() {
+
+    const question =
+        document.getElementById(
+            "repositoryQuestion"
+        ).value.trim();
+
+    if (!question) {
+
+        alert(
+            "Please enter a question first."
+        );
+
+        return;
+    }
+
+    await sendRepositoryQuestion(
+        question
+    );
+}
+
+
+// ================================================
+// SEND QUESTION
+// ================================================
+
+async function sendRepositoryQuestion(question) {
+
+    if (!scannedRepositoryFile) {
+
+        alert(
+            "Please scan a repository first."
+        );
+
+        return;
+    }
+
+    const loading =
+        document.getElementById(
+            "askLoading"
+        );
+
+    const answerBox =
+        document.getElementById(
+            "aiAnswer"
+        );
+
+    loading.style.display =
+        "block";
+
+    answerBox.classList.add(
+        "hidden"
+    );
+
+    answerBox.innerHTML = "";
+
+    try {
+
+        const response =
+            await fetch(
+                API_BASE +
+                "/ask-repository",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "text/plain"
+                    },
+
+                    body: question
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                getErrorMessage(
+                    data,
+                    "Could not get answer."
+                )
+            );
+        }
+
+        const answer =
+            data.answer ||
+            data.ai_answer ||
+            data.response ||
+            "";
+
+        if (!answer.trim()) {
+
+            throw new Error(
+                "No answer returned."
+            );
+        }
+
+        answerBox.innerHTML =
+            formatMarkdown(answer);
+
+        if (
+            data.sources &&
+            data.sources.length > 0
+        ) {
+
+            let sourcesHTML =
+                "<h3>📚 Retrieved Sources</h3>";
+
+            data.sources.forEach(
+                (source, index) => {
+
+                    sourcesHTML += `
+
+                        <div class="source-box">
+
+                            <strong>
+                                📄 Source ${index + 1}
+                            </strong>
+
+                            <br><br>
+
+                            ${escapeHtml(
+                                source.document ||
+                                source.content ||
+                                source.text ||
+                                ""
+                            )}
+
+                        </div>
+
+                    `;
+                }
+            );
+
+            answerBox.innerHTML +=
+                sourcesHTML;
+        }
+
+        answerBox.classList.remove(
+            "hidden"
+        );
+
+    }
+
+    catch (error) {
+
+        answerBox.innerHTML =
+            `<p class="error">
+                ❌ ${escapeHtml(
+                    error.message
+                )}
+            </p>`;
+
+        answerBox.classList.remove(
+            "hidden"
+        );
+
+        console.error(error);
+    }
+
+    finally {
+
+        loading.style.display =
+            "none";
+    }
+}
+
+
+</script>
+
+
+</body>
+</html>

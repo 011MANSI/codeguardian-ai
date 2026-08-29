@@ -1,0 +1,36 @@
+.env
+venv/
+__pycache__/
+
+
+### 3️⃣ Create `.gitignore`
+
+Create `.gitignore` and paste:
+
+```gitignore
+# Virtual Environment
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment Variables
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Generated Files
+*.zip
+
+# Temporary Files
+temp/
+uploads/
