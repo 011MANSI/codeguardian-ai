@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import zipfile
 
+
 from fastapi import FastAPI, Body, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -26,7 +27,7 @@ from app.rag.rag_engine import (
     create_repository_context,
     create_vector_store
 )
-
+from app.database import create_table, save_scan, get_history
 
 # ==================================================
 # APP
@@ -35,6 +36,8 @@ from app.rag.rag_engine import (
 app = FastAPI(
     title="CodeGuardian AI"
 )
+
+create_table()
 
 
 # ==================================================
@@ -289,6 +292,11 @@ def analyze_code(
         0,
         score
     )
+    save_scan(
+    code=code,
+    issues_count=len(issues),
+    risk_score=score
+    )
 
     try:
 
@@ -310,7 +318,20 @@ def analyze_code(
         "issues": issues,
         "ai_analysis": ai_analysis
     }
+# ==================================================
+# SCAN HISTORY
+# ==================================================
 
+@app.get("/history")
+def scan_history():
+
+    history = get_history()
+
+    return {
+        "status": "success",
+        "total": len(history),
+        "history": history
+    }
 
 # ==================================================
 # FIX SINGLE CODE
