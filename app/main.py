@@ -73,7 +73,9 @@ def home():
     return {
         "message": "CodeGuardian AI is running!"
     }
-
+@app.head("/")
+def health_check():
+    return
 
 # ==================================================
 # DETECT CODE ISSUES
