@@ -34,3 +34,5 @@ Thumbs.db
 # Temporary Files
 temp/
 uploads/
+
+history.db
