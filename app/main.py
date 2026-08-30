@@ -46,7 +46,7 @@ create_table()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://codeguardian-frontend-4p3p.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
