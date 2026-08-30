@@ -36,3 +36,9 @@ temp/
 uploads/
 
 history.db
+venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+.DS_Store

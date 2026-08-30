@@ -17,7 +17,6 @@ from app.ai.fix_generator import (
     local_fix
 )
 from app.ai.repository_reviewer import review_repository
-from app.ai.repository_qa import ask_repository
 
 from app.analysis.security_scanner import scan_security
 from app.analysis.repository_scanner import scan_repository
@@ -27,7 +26,11 @@ from app.rag.rag_engine import (
     create_repository_context
 )
 
-from app.database import create_table, save_scan, get_history
+from app.database import (
+    create_table,
+    save_scan,
+    get_history
+)
 
 
 # ==================================================
@@ -35,21 +38,24 @@ from app.database import create_table, save_scan, get_history
 # ==================================================
 
 app = FastAPI(
-    title="CodeGuardian AI"
+    title="CodeGuardian AI",
+    description="AI-powered code analysis, security scanning and repository review",
+    version="1.0.0"
 )
 
 create_table()
 
 
 # ==================================================
-# CORS
+# CORS - LOCAL DEVELOPMENT
 # ==================================================
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://codeguardian-frontend-4p3p.onrender.com",
         "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5500",
         "http://127.0.0.1:5500"
     ],
     allow_credentials=True,
@@ -93,7 +99,7 @@ def detect_issues(code: str):
     issues = []
 
     # ------------------------------------------
-    # Parse Python
+    # Parse Python Code
     # ------------------------------------------
 
     try:
@@ -116,7 +122,10 @@ def detect_issues(code: str):
 
     for node in ast.walk(tree):
 
+        # --------------------------------------
         # Unnecessary pass
+        # --------------------------------------
+
         if isinstance(node, ast.Pass):
 
             issues.append({
@@ -128,12 +137,16 @@ def detect_issues(code: str):
                 )
             })
 
-        # Function calls
+        # --------------------------------------
+        # Function Calls
+        # --------------------------------------
+
         if isinstance(node, ast.Call):
 
             if isinstance(node.func, ast.Name):
 
                 # print()
+
                 if node.func.id == "print":
 
                     issues.append({
@@ -145,11 +158,9 @@ def detect_issues(code: str):
                         )
                     })
 
-                # eval / exec
-                if node.func.id in [
-                    "eval",
-                    "exec"
-                ]:
+                # Dangerous functions
+
+                if node.func.id in ["eval", "exec"]:
 
                     issues.append({
                         "type": "Security Vulnerability",
@@ -162,7 +173,7 @@ def detect_issues(code: str):
                     })
 
     # ------------------------------------------
-    # Long functions
+    # Long Functions
     # ------------------------------------------
 
     for node in ast.walk(tree):
@@ -205,10 +216,7 @@ def detect_issues(code: str):
         start=1
     ):
 
-        if (
-            "TODO" in line
-            or "FIXME" in line
-        ):
+        if "TODO" in line or "FIXME" in line:
 
             issues.append({
                 "type": "Maintenance",
@@ -220,7 +228,7 @@ def detect_issues(code: str):
             })
 
     # ------------------------------------------
-    # Hardcoded secrets
+    # Hardcoded Secrets
     # ------------------------------------------
 
     secret_pattern = re.compile(
@@ -234,17 +242,51 @@ def detect_issues(code: str):
 
         variable = match.group(1)
 
+        line_number = (
+            code[:match.start()].count("\n") + 1
+        )
+
         issues.append({
             "type": "Security Vulnerability",
             "severity": "High",
             "message": (
                 f"Hardcoded secret detected "
                 f"in variable '{variable}' "
-                f"at line {code[:match.start()].count(chr(10)) + 1}"
+                f"at line {line_number}"
             )
         })
 
     return tree, issues
+
+
+# ==================================================
+# CALCULATE CODE SCORE
+# ==================================================
+
+def calculate_score(issues):
+
+    score = 100
+
+    severity_weights = {
+        "Critical": 30,
+        "High": 20,
+        "Medium": 10,
+        "Low": 5
+    }
+
+    for issue in issues:
+
+        severity = issue.get(
+            "severity",
+            "Low"
+        )
+
+        score -= severity_weights.get(
+            severity,
+            5
+        )
+
+    return max(0, score)
 
 
 # ==================================================
@@ -261,43 +303,40 @@ def analyze_code(
 
     tree, issues = detect_issues(code)
 
+    # Syntax Error
+
     if tree is None:
 
         return {
             "status": "error",
             "score": 0,
             "issues": issues,
-            "ai_analysis": "Fix the syntax error first."
+            "ai_analysis": (
+                "Fix the syntax error first."
+            )
         }
 
-    score = 100
+    # Calculate score
 
-    for issue in issues:
+    score = calculate_score(issues)
 
-        severity = issue.get(
-            "severity",
-            "Low"
+    # Save history
+
+    try:
+
+        save_scan(
+            code=code,
+            issues_count=len(issues),
+            risk_score=score
         )
 
-        if severity == "Critical":
-            score -= 30
+    except Exception as e:
 
-        elif severity == "High":
-            score -= 20
+        print(
+            f"Database save error: {e}"
+        )
 
-        elif severity == "Medium":
-            score -= 10
-
-        elif severity == "Low":
-            score -= 5
-
-    score = max(0, score)
-
-    save_scan(
-        code=code,
-        issues_count=len(issues),
-        risk_score=score
-    )
+    # AI Review
 
     try:
 
@@ -326,13 +365,22 @@ def analyze_code(
 @app.get("/history")
 def scan_history():
 
-    history = get_history()
+    try:
 
-    return {
-        "status": "success",
-        "total": len(history),
-        "history": history
-    }
+        history = get_history()
+
+        return {
+            "status": "success",
+            "total": len(history),
+            "history": history
+        }
+
+    except Exception as e:
+
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 
 # ==================================================
@@ -349,6 +397,8 @@ def fix_code(
 
     tree, issues = detect_issues(code)
 
+    # Syntax error
+
     if tree is None:
 
         return {
@@ -360,6 +410,8 @@ def fix_code(
             "issues": issues
         }
 
+    # No issues
+
     if not issues:
 
         return {
@@ -369,6 +421,8 @@ def fix_code(
             "original_code": code,
             "fixed_code": code
         }
+
+    # AI Fix
 
     try:
 
@@ -385,6 +439,10 @@ def fix_code(
             fixed_code
         )
 
+        # Validate fixed code
+
+        ast.parse(fixed_code)
+
         return {
             "status": "success",
             "message": "AI fix generated successfully!",
@@ -395,6 +453,8 @@ def fix_code(
 
     except Exception:
 
+        # Local fallback
+
         try:
 
             fixed_code = local_fix(
@@ -402,21 +462,26 @@ def fix_code(
                 issues
             )
 
+            fixed_code = ensure_required_imports(
+                fixed_code
+            )
+
+            ast.parse(fixed_code)
+
             return {
                 "status": "success",
-                "message": "Local security fix generated.",
+                "message": "Local fix generated successfully.",
                 "issues": issues,
                 "original_code": code,
                 "fixed_code": fixed_code
             }
 
-        except Exception:
+        except Exception as e:
 
             return {
                 "status": "error",
                 "message": (
-                    "Unable to generate fix "
-                    "at the moment."
+                    f"Unable to generate fix: {str(e)}"
                 ),
                 "issues": issues,
                 "original_code": code
@@ -424,7 +489,7 @@ def fix_code(
 
 
 # ==================================================
-# SCAN + INDEX REPOSITORY
+# SCAN REPOSITORY
 # ==================================================
 
 @app.post("/scan-repository")
@@ -435,6 +500,8 @@ async def scan_uploaded_repository(
     global repository_context
     global repository_security_report
     global repository_scan_result
+
+    # Validate ZIP
 
     if (
         not file.filename
@@ -467,7 +534,7 @@ async def scan_uploaded_repository(
             temp_zip = temp.name
 
         # ------------------------------------------
-        # Repository scanner
+        # Scan Repository
         # ------------------------------------------
 
         result = scan_repository(
@@ -477,7 +544,7 @@ async def scan_uploaded_repository(
         repository_scan_result = result
 
         # ------------------------------------------
-        # Extract repository
+        # Extract ZIP
         # ------------------------------------------
 
         extract_folder = tempfile.mkdtemp()
@@ -492,7 +559,7 @@ async def scan_uploaded_repository(
             )
 
         # ------------------------------------------
-        # Security scan
+        # Security Scan
         # ------------------------------------------
 
         security_report = scan_security(
@@ -504,7 +571,7 @@ async def scan_uploaded_repository(
         )
 
         # ------------------------------------------
-        # Risk score
+        # Calculate Security Risk
         # ------------------------------------------
 
         severity_weights = {
@@ -521,11 +588,13 @@ async def scan_uploaded_repository(
             []
         ):
 
+            severity = finding.get(
+                "severity",
+                "Low"
+            )
+
             risk_points += severity_weights.get(
-                finding.get(
-                    "severity",
-                    "Low"
-                ),
+                severity,
                 0
             )
 
@@ -535,15 +604,17 @@ async def scan_uploaded_repository(
         )
 
         # ------------------------------------------
-        # Repository knowledge
+        # Extract Repository Knowledge
         # ------------------------------------------
 
         knowledge = extract_repository_knowledge(
             extract_folder
         )
 
-        repository_context = create_repository_context(
-            knowledge
+        repository_context = (
+            create_repository_context(
+                knowledge
+            )
         )
 
         return {
@@ -582,11 +653,10 @@ async def scan_uploaded_repository(
 
             try:
 
-                os.remove(
-                    temp_zip
-                )
+                os.remove(temp_zip)
 
             except Exception:
+
                 pass
 
         if extract_folder:
@@ -598,7 +668,7 @@ async def scan_uploaded_repository(
 
 
 # ==================================================
-# SEARCH REPOSITORY - LIGHTWEIGHT SEARCH
+# SEARCH REPOSITORY
 # ==================================================
 
 @app.post("/search-repository")
@@ -611,12 +681,18 @@ def search_repository(
 
     global repository_context
 
+    # Validate query
+
     if not query.strip():
 
         return {
             "status": "error",
-            "message": "Search query cannot be empty."
+            "message": (
+                "Search query cannot be empty."
+            )
         }
+
+    # Check repository
 
     if not repository_context:
 
@@ -628,14 +704,18 @@ def search_repository(
             )
         }
 
+    # Lightweight search
+
     query_words = query.lower().split()
 
     matching_lines = []
 
     for line in repository_context.splitlines():
 
+        line_lower = line.lower()
+
         if any(
-            word in line.lower()
+            word in line_lower
             for word in query_words
         ):
 
@@ -646,6 +726,7 @@ def search_repository(
     return {
         "status": "success",
         "query": query,
+        "total_results": len(results),
         "results": results
     }
 
@@ -660,6 +741,7 @@ def local_repository_answer(
 
     global repository_security_report
     global repository_scan_result
+    global repository_context
 
     question_lower = question.lower()
 
@@ -669,21 +751,25 @@ def local_repository_answer(
     )
 
     # ------------------------------------------
-    # Security
+    # SECURITY
     # ------------------------------------------
 
-    if (
-        "security" in question_lower
-        or "risk" in question_lower
-        or "vulnerabil" in question_lower
-        or "secure" in question_lower
+    if any(
+        keyword in question_lower
+        for keyword in [
+            "security",
+            "risk",
+            "vulnerability",
+            "vulnerabilities",
+            "secure"
+        ]
     ):
 
         if not findings:
 
             return (
                 "✅ No security findings were detected "
-                "by the local CodeGuardian security scanner."
+                "by the CodeGuardian security scanner."
             )
 
         answer = (
@@ -700,15 +786,14 @@ def local_repository_answer(
                 f"{index}. **"
                 f"{finding.get('type', 'Security Issue')}"
                 f"**\n"
-                f"   Severity: **"
+                f"Severity: **"
                 f"{finding.get('severity', 'Unknown')}"
                 f"**\n"
-                f"   File: `"
+                f"File: `"
                 f"{finding.get('file', 'Unknown file')}"
                 f"`\n"
-                f"   Line: "
+                f"Line: "
                 f"{finding.get('line', 'Unknown')}\n"
-                f"   "
                 f"{finding.get('message', '')}"
                 f"\n\n"
             )
@@ -716,10 +801,13 @@ def local_repository_answer(
         return answer
 
     # ------------------------------------------
-    # Functions
+    # FUNCTIONS
     # ------------------------------------------
 
-    if "function" in question_lower:
+    if (
+        "function" in question_lower
+        or "method" in question_lower
+    ):
 
         functions = []
 
@@ -733,15 +821,12 @@ def local_repository_answer(
                 []
             ):
 
-                functions.append(
-                    function
-                )
+                functions.append(function)
 
         if functions:
 
             return (
-                "🔧 **Functions found "
-                "in the repository:**\n\n"
+                "🔧 **Functions found in the repository:**\n\n"
                 +
                 "\n".join(
                     f"• `{function}`"
@@ -755,10 +840,18 @@ def local_repository_answer(
         )
 
     # ------------------------------------------
-    # Architecture
+    # ARCHITECTURE
     # ------------------------------------------
 
-    if "architecture" in question_lower:
+    if any(
+        keyword in question_lower
+        for keyword in [
+            "architecture",
+            "structure",
+            "project structure",
+            "files"
+        ]
+    ):
 
         files = repository_scan_result.get(
             "files",
@@ -783,9 +876,7 @@ def local_repository_answer(
                     )
                 )
 
-                answer += (
-                    f"• `{file_name}`\n"
-                )
+                answer += f"• `{file_name}`\n"
 
             return answer
 
@@ -795,25 +886,45 @@ def local_repository_answer(
         )
 
     # ------------------------------------------
-    # General explanation
+    # GENERAL EXPLANATION
     # ------------------------------------------
 
-    if (
-        "explain" in question_lower
-        or "code" in question_lower
+    if any(
+        keyword in question_lower
+        for keyword in [
+            "explain",
+            "code",
+            "repository",
+            "project"
+        ]
     ):
 
+        if repository_context:
+
+            lines = repository_context.splitlines()
+
+            preview = "\n".join(
+                lines[:15]
+            )
+
+            return (
+                "💡 **Repository Overview**\n\n"
+                "The repository was successfully scanned.\n\n"
+                f"{preview}"
+            )
+
         return (
-            "💡 **Code Explanation**\n\n"
-            "The repository was successfully scanned. "
-            "CodeGuardian can provide information about "
-            "functions, architecture, and security findings."
+            "💡 Repository information is available "
+            "but detailed context could not be generated."
         )
 
     return (
-        "✅ Repository was successfully scanned. "
-        "Try asking about security, functions, "
-        "architecture, or code explanation."
+        "✅ Repository was successfully scanned.\n\n"
+        "Try asking questions like:\n"
+        "• What security vulnerabilities were found?\n"
+        "• What functions are present?\n"
+        "• Explain the project architecture.\n"
+        "• Explain this repository."
     )
 
 
@@ -830,7 +941,8 @@ def ask_repository_question(
 ):
 
     global repository_scan_result
-    global repository_context
+
+    # Check repository
 
     if not repository_scan_result:
 
@@ -842,14 +954,19 @@ def ask_repository_question(
             )
         }
 
+    # Validate question
+
     if not question.strip():
 
         return {
             "status": "error",
-            "message": "Question cannot be empty."
+            "message": (
+                "Question cannot be empty."
+            )
         }
 
-    # Use lightweight local repository analysis
+    # Local answer
+
     answer = local_repository_answer(
         question
     )
@@ -886,6 +1003,8 @@ async def review_uploaded_repository(
 
     try:
 
+        # Save ZIP
+
         with tempfile.NamedTemporaryFile(
             delete=False,
             suffix=".zip"
@@ -896,6 +1015,8 @@ async def review_uploaded_repository(
             )
 
             temp_zip = temp.name
+
+        # Extract ZIP
 
         extract_folder = tempfile.mkdtemp()
 
@@ -908,6 +1029,8 @@ async def review_uploaded_repository(
                 extract_folder
             )
 
+        # Extract knowledge
+
         knowledge = extract_repository_knowledge(
             extract_folder
         )
@@ -917,6 +1040,8 @@ async def review_uploaded_repository(
                 knowledge
             )
         )
+
+        # AI Review
 
         try:
 
@@ -936,9 +1061,7 @@ async def review_uploaded_repository(
             "message": (
                 "AI repository review completed!"
             ),
-            "files_analyzed": len(
-                knowledge
-            ),
+            "files_analyzed": len(knowledge),
             "ai_review": ai_review
         }
 
@@ -968,11 +1091,10 @@ async def review_uploaded_repository(
 
             try:
 
-                os.remove(
-                    temp_zip
-                )
+                os.remove(temp_zip)
 
             except Exception:
+
                 pass
 
         if extract_folder:
@@ -991,6 +1113,8 @@ async def review_uploaded_repository(
 async def fix_repository(
     file: UploadFile = File(...)
 ):
+
+    # Validate ZIP
 
     if (
         not file.filename
@@ -1025,7 +1149,7 @@ async def fix_repository(
             temp_zip = temp.name
 
         # ------------------------------------------
-        # Extract repository
+        # Extract Repository
         # ------------------------------------------
 
         extract_folder = tempfile.mkdtemp()
@@ -1040,7 +1164,7 @@ async def fix_repository(
             )
 
         # ------------------------------------------
-        # Create fixed repository
+        # Create Fixed Repository
         # ------------------------------------------
 
         fixed_folder = tempfile.mkdtemp()
@@ -1052,12 +1176,14 @@ async def fix_repository(
         )
 
         # ------------------------------------------
-        # Process Python files
+        # Process Python Files
         # ------------------------------------------
 
         for root, dirs, files in os.walk(
             extract_folder
         ):
+
+            # Ignore unnecessary folders
 
             dirs[:] = [
                 directory
@@ -1077,6 +1203,7 @@ async def fix_repository(
                 if not filename.lower().endswith(
                     ".py"
                 ):
+
                     continue
 
                 original_path = os.path.join(
@@ -1094,7 +1221,10 @@ async def fix_repository(
                     relative_path
                 )
 
-                # Read file
+                # ----------------------------------
+                # Read Python File
+                # ----------------------------------
+
                 try:
 
                     with open(
@@ -1103,30 +1233,62 @@ async def fix_repository(
                         encoding="utf-8"
                     ) as python_file:
 
-                        original_code = python_file.read()
+                        original_code = (
+                            python_file.read()
+                        )
 
                 except UnicodeDecodeError:
 
-                    with open(
-                        original_path,
-                        "r",
-                        encoding="latin-1"
-                    ) as python_file:
+                    try:
 
-                        original_code = python_file.read()
+                        with open(
+                            original_path,
+                            "r",
+                            encoding="latin-1"
+                        ) as python_file:
 
-                # Detect issues
-                tree, issues = detect_issues(
-                    original_code
-                )
+                            original_code = (
+                                python_file.read()
+                            )
+
+                    except Exception:
+
+                        continue
+
+                except Exception:
+
+                    continue
+
+                # ----------------------------------
+                # Detect Issues
+                # ----------------------------------
+
+                try:
+
+                    tree, issues = detect_issues(
+                        original_code
+                    )
+
+                except Exception:
+
+                    continue
+
+                # Skip syntax errors
 
                 if tree is None:
+
                     continue
+
+                # Skip clean files
 
                 if not issues:
+
                     continue
 
-                # Generate fix
+                # ----------------------------------
+                # Generate Fix
+                # ----------------------------------
+
                 try:
 
                     fixed_code = generate_fix(
@@ -1142,35 +1304,59 @@ async def fix_repository(
                         fixed_code
                     )
 
-                    # Validate
+                    # Validate AI output
+
                     ast.parse(
                         fixed_code
                     )
 
                 except Exception:
 
-                    fixed_code = local_fix(
-                        original_code,
-                        issues
-                    )
+                    # Local fallback
 
-                    fixed_code = ensure_required_imports(
-                        fixed_code
-                    )
+                    try:
 
-                # Write fixed file
-                with open(
-                    fixed_path,
-                    "w",
-                    encoding="utf-8"
-                ) as python_file:
+                        fixed_code = local_fix(
+                            original_code,
+                            issues
+                        )
 
-                    python_file.write(
-                        fixed_code
-                    )
+                        fixed_code = (
+                            ensure_required_imports(
+                                fixed_code
+                            )
+                        )
+
+                        ast.parse(
+                            fixed_code
+                        )
+
+                    except Exception:
+
+                        continue
+
+                # ----------------------------------
+                # Write Fixed File
+                # ----------------------------------
+
+                try:
+
+                    with open(
+                        fixed_path,
+                        "w",
+                        encoding="utf-8"
+                    ) as python_file:
+
+                        python_file.write(
+                            fixed_code
+                        )
+
+                except Exception:
+
+                    continue
 
         # ------------------------------------------
-        # Create output ZIP
+        # Create Output ZIP
         # ------------------------------------------
 
         output_zip = tempfile.mktemp(
@@ -1204,6 +1390,10 @@ async def fix_repository(
                         archive_path
                     )
 
+        # ------------------------------------------
+        # Return Fixed Repository
+        # ------------------------------------------
+
         return FileResponse(
             output_zip,
             media_type="application/zip",
@@ -1229,20 +1419,21 @@ async def fix_repository(
 
     finally:
 
+        # Remove temporary input ZIP
+
         if temp_zip:
 
             try:
 
-                if os.path.exists(
-                    temp_zip
-                ):
+                if os.path.exists(temp_zip):
 
-                    os.remove(
-                        temp_zip
-                    )
+                    os.remove(temp_zip)
 
             except Exception:
+
                 pass
+
+        # Remove extraction folders
 
         if extract_folder:
 
