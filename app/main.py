@@ -5,7 +5,6 @@ import shutil
 import tempfile
 import zipfile
 
-
 from fastapi import FastAPI, Body, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -19,15 +18,17 @@ from app.ai.fix_generator import (
 )
 from app.ai.repository_reviewer import review_repository
 from app.ai.repository_qa import ask_repository
+
 from app.analysis.security_scanner import scan_security
 from app.analysis.repository_scanner import scan_repository
 
 from app.rag.rag_engine import (
     extract_repository_knowledge,
-    create_repository_context,
-    create_vector_store
+    create_repository_context
 )
+
 from app.database import create_table, save_scan, get_history
+
 
 # ==================================================
 # APP
@@ -46,9 +47,11 @@ create_table()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ "https://codeguardian-frontend-4p3p.onrender.com",
+    allow_origins=[
+        "https://codeguardian-frontend-4p3p.onrender.com",
         "http://localhost:3000",
-        "http://127.0.0.1:5500"],
+        "http://127.0.0.1:5500"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -59,7 +62,6 @@ app.add_middleware(
 # GLOBAL REPOSITORY STATE
 # ==================================================
 
-repository_store = None
 repository_context = ""
 repository_security_report = {}
 repository_scan_result = {}
@@ -75,9 +77,12 @@ def home():
     return {
         "message": "CodeGuardian AI is running!"
     }
+
+
 @app.head("/")
 def health_check():
     return
+
 
 # ==================================================
 # DETECT CODE ISSUES
@@ -106,15 +111,12 @@ def detect_issues(code: str):
         ]
 
     # ------------------------------------------
-    # AST analysis
+    # AST Analysis
     # ------------------------------------------
 
     for node in ast.walk(tree):
 
-        # --------------------------------------
         # Unnecessary pass
-        # --------------------------------------
-
         if isinstance(node, ast.Pass):
 
             issues.append({
@@ -126,10 +128,7 @@ def detect_issues(code: str):
                 )
             })
 
-        # --------------------------------------
         # Function calls
-        # --------------------------------------
-
         if isinstance(node, ast.Call):
 
             if isinstance(node.func, ast.Name):
@@ -292,21 +291,17 @@ def analyze_code(
         elif severity == "Low":
             score -= 5
 
-    score = max(
-        0,
-        score
-    )
+    score = max(0, score)
+
     save_scan(
-    code=code,
-    issues_count=len(issues),
-    risk_score=score
+        code=code,
+        issues_count=len(issues),
+        risk_score=score
     )
 
     try:
 
-        ai_analysis = review_code(
-            code
-        )
+        ai_analysis = review_code(code)
 
     except Exception:
 
@@ -322,6 +317,8 @@ def analyze_code(
         "issues": issues,
         "ai_analysis": ai_analysis
     }
+
+
 # ==================================================
 # SCAN HISTORY
 # ==================================================
@@ -337,6 +334,7 @@ def scan_history():
         "history": history
     }
 
+
 # ==================================================
 # FIX SINGLE CODE
 # ==================================================
@@ -349,9 +347,7 @@ def fix_code(
     )
 ):
 
-    tree, issues = detect_issues(
-        code
-    )
+    tree, issues = detect_issues(code)
 
     if tree is None:
 
@@ -436,7 +432,6 @@ async def scan_uploaded_repository(
     file: UploadFile = File(...)
 ):
 
-    global repository_store
     global repository_context
     global repository_security_report
     global repository_scan_result
@@ -547,22 +542,14 @@ async def scan_uploaded_repository(
             extract_folder
         )
 
-        repository_context = (
-            create_repository_context(
-                knowledge
-            )
-        )
-
-        repository_store = (
-            create_vector_store(
-                knowledge
-            )
+        repository_context = create_repository_context(
+            knowledge
         )
 
         return {
             "status": "success",
             "message": (
-                "Repository scanned and indexed successfully!"
+                "Repository scanned successfully!"
             ),
             "repository": result,
             "security_report": security_report,
@@ -594,9 +581,11 @@ async def scan_uploaded_repository(
         ):
 
             try:
+
                 os.remove(
                     temp_zip
                 )
+
             except Exception:
                 pass
 
@@ -609,7 +598,7 @@ async def scan_uploaded_repository(
 
 
 # ==================================================
-# SEARCH REPOSITORY
+# SEARCH REPOSITORY - LIGHTWEIGHT SEARCH
 # ==================================================
 
 @app.post("/search-repository")
@@ -620,17 +609,7 @@ def search_repository(
     )
 ):
 
-    global repository_store
-
-    if repository_store is None:
-
-        return {
-            "status": "error",
-            "message": (
-                "No repository has been indexed yet. "
-                "Please scan a repository first."
-            )
-        }
+    global repository_context
 
     if not query.strip():
 
@@ -639,10 +618,30 @@ def search_repository(
             "message": "Search query cannot be empty."
         }
 
-    results = repository_store.search(
-        query,
-        top_k=3
-    )
+    if not repository_context:
+
+        return {
+            "status": "error",
+            "message": (
+                "No repository has been scanned yet. "
+                "Please scan a repository first."
+            )
+        }
+
+    query_words = query.lower().split()
+
+    matching_lines = []
+
+    for line in repository_context.splitlines():
+
+        if any(
+            word in line.lower()
+            for word in query_words
+        ):
+
+            matching_lines.append(line)
+
+    results = matching_lines[:20]
 
     return {
         "status": "success",
@@ -662,15 +661,11 @@ def local_repository_answer(
     global repository_security_report
     global repository_scan_result
 
-    question_lower = (
-        question.lower()
-    )
+    question_lower = question.lower()
 
-    findings = (
-        repository_security_report.get(
-            "findings",
-            []
-        )
+    findings = repository_security_report.get(
+        "findings",
+        []
     )
 
     # ------------------------------------------
@@ -800,7 +795,7 @@ def local_repository_answer(
         )
 
     # ------------------------------------------
-    # Explain
+    # General explanation
     # ------------------------------------------
 
     if (
@@ -810,16 +805,15 @@ def local_repository_answer(
 
         return (
             "💡 **Code Explanation**\n\n"
-            "The repository was successfully scanned "
-            "and indexed. CodeGuardian can retrieve "
-            "relevant files, functions, and security "
-            "findings from the repository."
+            "The repository was successfully scanned. "
+            "CodeGuardian can provide information about "
+            "functions, architecture, and security findings."
         )
 
     return (
-        "⚠️ The AI service is temporarily unavailable. "
-        "However, the repository was successfully "
-        "scanned and indexed."
+        "✅ Repository was successfully scanned. "
+        "Try asking about security, functions, "
+        "architecture, or code explanation."
     )
 
 
@@ -835,14 +829,15 @@ def ask_repository_question(
     )
 ):
 
-    global repository_store
+    global repository_scan_result
+    global repository_context
 
-    if repository_store is None:
+    if not repository_scan_result:
 
         return {
             "status": "error",
             "message": (
-                "No repository has been indexed yet. "
+                "No repository has been scanned yet. "
                 "Please scan a repository first."
             )
         }
@@ -854,66 +849,16 @@ def ask_repository_question(
             "message": "Question cannot be empty."
         }
 
-    try:
-
-        results = repository_store.search(
-            question,
-            top_k=3
-        )
-
-    except Exception:
-
-        results = []
-
-    if not results:
-
-        return {
-            "status": "success",
-            "question": question,
-            "answer": local_repository_answer(
-                question
-            ),
-            "sources": []
-        }
-
-    retrieved_context = "\n\n".join(
-        result["document"]
-        for result in results
+    # Use lightweight local repository analysis
+    answer = local_repository_answer(
+        question
     )
-
-    try:
-
-        answer = ask_repository(
-            question,
-            retrieved_context
-        )
-
-        if (
-            not answer
-            or not str(answer).strip()
-        ):
-
-            answer = local_repository_answer(
-                question
-            )
-
-    except Exception:
-
-        answer = local_repository_answer(
-            question
-        )
 
     return {
         "status": "success",
         "question": question,
         "answer": answer,
-        "sources": [
-            {
-                "document": result["document"],
-                "distance": result["distance"]
-            }
-            for result in results
-        ]
+        "sources": []
     }
 
 
@@ -963,10 +908,8 @@ async def review_uploaded_repository(
                 extract_folder
             )
 
-        knowledge = (
-            extract_repository_knowledge(
-                extract_folder
-            )
+        knowledge = extract_repository_knowledge(
+            extract_folder
         )
 
         repository_context_local = (
@@ -1024,9 +967,11 @@ async def review_uploaded_repository(
         ):
 
             try:
+
                 os.remove(
                     temp_zip
                 )
+
             except Exception:
                 pass
 
@@ -1062,17 +1007,11 @@ async def fix_repository(
     fixed_folder = None
     output_zip = None
 
-    fixed_files = []
-    unchanged_files = []
-    failed_files = []
-
-    total_issues = 0
-
     try:
 
-        # ==========================================
-        # SAVE UPLOADED ZIP
-        # ==========================================
+        # ------------------------------------------
+        # Save ZIP
+        # ------------------------------------------
 
         with tempfile.NamedTemporaryFile(
             delete=False,
@@ -1085,9 +1024,9 @@ async def fix_repository(
 
             temp_zip = temp.name
 
-        # ==========================================
-        # EXTRACT ORIGINAL REPOSITORY
-        # ==========================================
+        # ------------------------------------------
+        # Extract repository
+        # ------------------------------------------
 
         extract_folder = tempfile.mkdtemp()
 
@@ -1100,29 +1039,26 @@ async def fix_repository(
                 extract_folder
             )
 
-        # ==========================================
-        # CREATE FIXED REPOSITORY
-        # ==========================================
+        # ------------------------------------------
+        # Create fixed repository
+        # ------------------------------------------
 
         fixed_folder = tempfile.mkdtemp()
 
-        # Copy EVERYTHING first.
-        # This preserves non-Python files.
         shutil.copytree(
             extract_folder,
             fixed_folder,
             dirs_exist_ok=True
         )
 
-        # ==========================================
-        # PROCESS EVERY PYTHON FILE
-        # ==========================================
+        # ------------------------------------------
+        # Process Python files
+        # ------------------------------------------
 
         for root, dirs, files in os.walk(
             extract_folder
         ):
 
-            # Ignore unnecessary directories
             dirs[:] = [
                 directory
                 for directory in dirs
@@ -1158,10 +1094,7 @@ async def fix_repository(
                     relative_path
                 )
 
-                # ==================================
-                # READ FILE
-                # ==================================
-
+                # Read file
                 try:
 
                     with open(
@@ -1170,88 +1103,30 @@ async def fix_repository(
                         encoding="utf-8"
                     ) as python_file:
 
-                        original_code = (
-                            python_file.read()
-                        )
+                        original_code = python_file.read()
 
                 except UnicodeDecodeError:
 
-                    try:
+                    with open(
+                        original_path,
+                        "r",
+                        encoding="latin-1"
+                    ) as python_file:
 
-                        with open(
-                            original_path,
-                            "r",
-                            encoding="latin-1"
-                        ) as python_file:
+                        original_code = python_file.read()
 
-                            original_code = (
-                                python_file.read()
-                            )
-
-                    except Exception as e:
-
-                        failed_files.append({
-                            "file": relative_path,
-                            "error": str(e)
-                        })
-
-                        continue
-
-                # ==================================
-                # DETECT ISSUES
-                # ==================================
-
-                try:
-
-                    tree, issues = detect_issues(
-                        original_code
-                    )
-
-                except Exception as e:
-
-                    failed_files.append({
-                        "file": relative_path,
-                        "error": str(e)
-                    })
-
-                    continue
-
-                # ==================================
-                # SYNTAX ERROR
-                # ==================================
-
-                if tree is None:
-
-                    failed_files.append({
-                        "file": relative_path,
-                        "error": (
-                            "File contains a syntax "
-                            "error and could not be safely fixed."
-                        )
-                    })
-
-                    continue
-
-                # ==================================
-                # NO ISSUES
-                # ==================================
-
-                if not issues:
-
-                    unchanged_files.append(
-                        relative_path
-                    )
-
-                    continue
-
-                total_issues += len(
-                    issues
+                # Detect issues
+                tree, issues = detect_issues(
+                    original_code
                 )
 
-                # ==================================
-                # GENERATE FIX
-                # ==================================
+                if tree is None:
+                    continue
 
+                if not issues:
+                    continue
+
+                # Generate fix
                 try:
 
                     fixed_code = generate_fix(
@@ -1259,124 +1134,44 @@ async def fix_repository(
                         issues
                     )
 
-                    # Remove accidental Markdown
                     fixed_code = clean_ai_code(
                         fixed_code
                     )
 
-                    # Guarantee imports
-                    fixed_code = (
-                        ensure_required_imports(
-                            fixed_code
-                        )
+                    fixed_code = ensure_required_imports(
+                        fixed_code
                     )
 
-                    # ==================================
-                    # VALIDATE AI OUTPUT
-                    # ==================================
+                    # Validate
+                    ast.parse(
+                        fixed_code
+                    )
 
-                    try:
+                except Exception:
 
-                        ast.parse(
-                            fixed_code
-                        )
+                    fixed_code = local_fix(
+                        original_code,
+                        issues
+                    )
 
-                    except SyntaxError:
+                    fixed_code = ensure_required_imports(
+                        fixed_code
+                    )
 
-                        # AI generated invalid Python.
-                        # Use local fixer.
-                        fixed_code = local_fix(
-                            original_code,
-                            issues
-                        )
+                # Write fixed file
+                with open(
+                    fixed_path,
+                    "w",
+                    encoding="utf-8"
+                ) as python_file:
 
-                        fixed_code = (
-                            ensure_required_imports(
-                                fixed_code
-                            )
-                        )
+                    python_file.write(
+                        fixed_code
+                    )
 
-                        # Validate local fix
-                        ast.parse(
-                            fixed_code
-                        )
-
-                    # ==================================
-                    # WRITE FIXED FILE
-                    # ==================================
-
-                    with open(
-                        fixed_path,
-                        "w",
-                        encoding="utf-8"
-                    ) as python_file:
-
-                        python_file.write(
-                            fixed_code
-                        )
-
-                    fixed_files.append({
-                        "file": relative_path,
-                        "issues_fixed": len(
-                            issues
-                        )
-                    })
-
-                except Exception as e:
-
-                    # ==================================
-                    # LAST LOCAL FALLBACK
-                    # ==================================
-
-                    try:
-
-                        fixed_code = local_fix(
-                            original_code,
-                            issues
-                        )
-
-                        fixed_code = (
-                            ensure_required_imports(
-                                fixed_code
-                            )
-                        )
-
-                        ast.parse(
-                            fixed_code
-                        )
-
-                        with open(
-                            fixed_path,
-                            "w",
-                            encoding="utf-8"
-                        ) as python_file:
-
-                            python_file.write(
-                                fixed_code
-                            )
-
-                        fixed_files.append({
-                            "file": relative_path,
-                            "issues_fixed": len(
-                                issues
-                            ),
-                            "method": "local_fallback"
-                        })
-
-                    except Exception as local_error:
-
-                        failed_files.append({
-                            "file": relative_path,
-                            "error": (
-                                f"AI fix failed: {e}; "
-                                f"Local fix failed: "
-                                f"{local_error}"
-                            )
-                        })
-
-        # ==========================================
-        # CREATE FIXED ZIP
-        # ==========================================
+        # ------------------------------------------
+        # Create output ZIP
+        # ------------------------------------------
 
         output_zip = tempfile.mktemp(
             suffix=".zip"
@@ -1409,10 +1204,6 @@ async def fix_repository(
                         archive_path
                     )
 
-        # ==========================================
-        # RETURN FIXED ZIP
-        # ==========================================
-
         return FileResponse(
             output_zip,
             media_type="application/zip",
@@ -1437,12 +1228,6 @@ async def fix_repository(
         }
 
     finally:
-
-        # Do not delete output_zip here because
-        # FileResponse needs it after returning.
-        #
-        # Temporary input/extraction folders
-        # can safely be removed.
 
         if temp_zip:
 
